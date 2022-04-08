@@ -1,0 +1,32 @@
+name: Default
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+     - main
+
+jobs:
+  default:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v1
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to Github Packages
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+      - name: Build image and push to Docker Hub and GitHub Container Registry
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          target: gardener-extension-provider-dns-cloudflare
+          context: ./
+          # Note: tags has to be all lower-case
+          tags: |
+            ghcr.io/schrodit/gardener-extension-provider-dns-cloudflare:latest

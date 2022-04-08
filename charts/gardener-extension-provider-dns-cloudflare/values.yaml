@@ -1,0 +1,62 @@
+image:
+  repository: ghcr.io/schrodit/gardener-extension-provider-dns-cloudflare
+  tag: latest
+  pullPolicy: IfNotPresent
+
+replicaCount: 1
+maxUnavailable: 1
+maxSurge: 50%
+
+resources: {}
+vpa:
+  enabled: true
+  resourcePolicy:
+    minAllowed:
+      cpu: 50m
+      memory: 64Mi
+  updatePolicy:
+    updateMode: "Auto"
+
+healthPort: 8081
+
+controllers:
+  dnsrecord:
+    concurrentSyncs: 5
+  ignoreOperationAnnotation: false
+
+disableControllers: []
+disableWebhooks: []
+ignoreResources: false
+
+# imageVectorOverwrite: |
+#   images:
+#   - name: pause-container
+#     sourceRepository: github.com/kubernetes/kubernetes/blob/master/build/pause/Dockerfile
+#     repository: gcr.io/google_containers/pause-amd64
+#     tag: "3.0"
+#     version: 1.11.x
+#   - name: pause-container
+#     sourceRepository: github.com/kubernetes/kubernetes/blob/master/build/pause/Dockerfile
+#     repository: gcr.io/google_containers/pause-amd64
+#     tag: "3.1"
+#     version: ">= 1.12"
+#   ...
+
+webhookConfig:
+  servicePort: 443
+  serverPort: 10250
+
+leaderElection:
+  resourceLock: leases
+
+config:
+  clientConnection:
+    acceptContentTypes: application/json
+    contentType: application/json
+    qps: 100
+    burst: 130
+
+gardener:
+  version: ""
+  seed:
+    provider: gcp

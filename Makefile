@@ -28,11 +28,6 @@ WEBHOOK_CONFIG_MODE	:= url
 WEBHOOK_CONFIG_URL	:= host.docker.internal:$(WEBHOOK_CONFIG_PORT)
 EXTENSION_NAMESPACE	:=
 
-WEBHOOK_PARAM := --webhook-config-url=$(WEBHOOK_CONFIG_URL)
-ifeq ($(WEBHOOK_CONFIG_MODE), service)
-  WEBHOOK_PARAM := --webhook-config-namespace=$(EXTENSION_NAMESPACE)
-endif
-
 REGION               := europe-west1
 SERVICE_ACCOUNT_FILE := .kube-secrets/gcp/serviceaccount.json
 
@@ -56,21 +51,7 @@ start:
 		--config-file=./example/00-componentconfig.yaml \
 		--ignore-operation-annotation=$(IGNORE_OPERATION_ANNOTATION) \
 		--leader-election=$(LEADER_ELECTION) \
-		--webhook-config-server-host=0.0.0.0 \
-		--webhook-config-server-port=$(WEBHOOK_CONFIG_PORT) \
-		--webhook-config-mode=$(WEBHOOK_CONFIG_MODE) \
-		--gardener-version="v1.39.0" \
-		$(WEBHOOK_PARAM)
-
-.PHONY: start-admission
-start-admission:
-	@LEADER_ELECTION_NAMESPACE=garden GO111MODULE=on go run \
-		-mod=vendor \
-		-ldflags $(LD_FLAGS) \
-		./cmd/$(EXTENSION_PREFIX)-$(ADMISSION_NAME) \
-		--webhook-config-server-host=0.0.0.0 \
-		--webhook-config-server-port=9443 \
-		--webhook-config-cert-dir=./example/admission-gcp-certs
+		--gardener-version="v1.39.0"
 
 #################################################################
 # Rules related to binary build, Docker image build and release #

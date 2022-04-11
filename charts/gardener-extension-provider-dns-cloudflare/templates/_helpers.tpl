@@ -1,5 +1,5 @@
 {{- define "name" -}}
-gardener-extension-provider-gcp
+gardener-extension-provider-dns-cloudflare
 {{- end -}}
 
 {{- define "labels.app.key" -}}

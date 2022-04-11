@@ -1,6 +1,6 @@
 # [Gardener DNS Extension for Cloudflare](https://gardener.cloud)
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/gardener/gardener-extension-provider-dns-cloudflare)](https://goreportcard.com/report/github.com/gardener/gardener-extension-provider-dns-cloudflare)
+[![Go Report Card](https://goreportcard.com/badge/github.com/schrodit/gardener-extension-provider-dns-cloudflare)](https://goreportcard.com/report/github.com/schrodit/gardener-extension-provider-dns-cloudflare)
 
 Project Gardener implements the automated management and operation of [Kubernetes](https://kubernetes.io/) clusters as a service.
 Its main principle is to leverage Kubernetes concepts for all of its tasks.

@@ -90,6 +90,7 @@ func (a *actuator) Reconcile(ctx context.Context, dns *extensionsv1alpha1.DNSRec
 	// Update resource status
 	patch := client.MergeFrom(dns.DeepCopy())
 	dns.Status.Zone = &managedZone
+	dns.Status.ObservedGeneration = dns.Generation
 	return a.Client().Status().Patch(ctx, dns, patch)
 }
 

@@ -36,9 +36,18 @@ type SecretBinding struct {
 	// +optional
 	Quotas []corev1.ObjectReference `json:"quotas,omitempty" protobuf:"bytes,3,rep,name=quotas"`
 	// Provider defines the provider type of the SecretBinding.
-	// This field is immutable when the SecretBindingProviderValidation feature gate is enabled.
+	// This field is immutable.
 	// +optional
 	Provider *SecretBindingProvider `json:"provider,omitempty" protobuf:"bytes,4,opt,name=provider"`
+}
+
+// GetProviderType gets the type of the provider.
+func (sb *SecretBinding) GetProviderType() string {
+	if sb.Provider == nil {
+		return ""
+	}
+
+	return sb.Provider.Type
 }
 
 // SecretBindingProvider defines the provider type of the SecretBinding.

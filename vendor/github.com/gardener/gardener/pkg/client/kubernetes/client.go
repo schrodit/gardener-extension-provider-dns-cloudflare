@@ -40,14 +40,6 @@ import (
 	versionutils "github.com/gardener/gardener/pkg/utils/version"
 )
 
-var (
-	// UseCachedRuntimeClients is a flag for enabling cached controller-runtime clients. The CachedRuntimeClients feature
-	// gate (enabled by default sinde v1.34) causes this flag to be set to true.
-	// If enabled, the client returned by Interface.Client() will be backed by Interface.Cache(), otherwise it will talk
-	// directly to the API server.
-	UseCachedRuntimeClients = false
-)
-
 const (
 	// KubeConfig is the key to the kubeconfig
 	KubeConfig = "kubeconfig"
@@ -248,6 +240,8 @@ var supportedKubernetesVersions = []string{
 	"1.21",
 	"1.22",
 	"1.23",
+	"1.24",
+	"1.25",
 }
 
 func checkIfSupportedKubernetesVersion(gitVersion string) error {
@@ -301,7 +295,7 @@ func newClientSet(conf *Config) (Interface, error) {
 	}
 
 	var runtimeClient client.Client
-	if UseCachedRuntimeClients && !conf.disableCache {
+	if !conf.disableCache {
 		delegatingClient, err := client.NewDelegatingClient(client.NewDelegatingClientInput{
 			CacheReader:     runtimeCache,
 			Client:          c,
@@ -382,7 +376,7 @@ var cacheError = &kcache.CacheError{}
 
 // Get retrieves an obj for a given object key from the Kubernetes Cluster.
 // In case of a cache error, the underlying API reader is used to execute the request again.
-func (d *fallbackClient) Get(ctx context.Context, key client.ObjectKey, obj client.Object) error {
+func (d *fallbackClient) Get(ctx context.Context, key client.ObjectKey, obj client.Object, opts ...client.GetOption) error {
 	err := d.Client.Get(ctx, key, obj)
 	if err != nil && errors.As(err, &cacheError) {
 		logf.Log.V(1).Info("Falling back to API reader because a cache error occurred", "error", err)

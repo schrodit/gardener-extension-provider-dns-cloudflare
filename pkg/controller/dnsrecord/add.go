@@ -17,7 +17,6 @@ package dnsrecord
 import (
 	"github.com/gardener/gardener/extensions/pkg/controller/dnsrecord"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
@@ -26,8 +25,6 @@ const DNSType = "cloudflare-dns"
 var (
 	// DefaultAddOptions are the default AddOptions for AddToManager.
 	DefaultAddOptions = AddOptions{}
-
-	logger = log.Log.WithName("gcp-dnsrecord-controller")
 )
 
 // AddOptions are options to apply when adding the GCP controlplane controller to the manager.
@@ -42,7 +39,7 @@ type AddOptions struct {
 // The opts.Reconciler is being set with a newly instantiated actuator.
 func AddToManagerWithOptions(mgr manager.Manager, opts AddOptions) error {
 	return dnsrecord.Add(mgr, dnsrecord.AddArgs{
-		Actuator:          NewActuator(logger),
+		Actuator:          NewActuator(),
 		ControllerOptions: opts.Controller,
 		Predicates:        dnsrecord.DefaultPredicates(opts.IgnoreOperationAnnotation),
 		Type:              DNSType,

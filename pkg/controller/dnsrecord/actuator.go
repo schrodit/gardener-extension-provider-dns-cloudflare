@@ -22,7 +22,6 @@ import (
 	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/dnsclient"
 
 	extensionscontroller "github.com/gardener/gardener/extensions/pkg/controller"
-	"github.com/gardener/gardener/extensions/pkg/controller/common"
 	"github.com/gardener/gardener/extensions/pkg/controller/dnsrecord"
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	extensionsv1alpha1 "github.com/gardener/gardener/pkg/apis/extensions/v1alpha1"
@@ -41,7 +40,7 @@ const (
 )
 
 type actuator struct {
-	common.ClientContext
+	client client.Client
 }
 
 // NewActuator creates a new dnsrecord.Actuator.
@@ -49,9 +48,14 @@ func NewActuator() dnsrecord.Actuator {
 	return &actuator{}
 }
 
+func (a *actuator) InjectClient(client client.Client) error {
+	a.client = client
+	return nil
+}
+
 // Reconcile reconciles the DNSRecord.
 func (a *actuator) Reconcile(ctx context.Context, log logr.Logger, dns *extensionsv1alpha1.DNSRecord, cluster *extensionscontroller.Cluster) error {
-	dnsClient, err := dnsclient.NewDNSClientFromSecretRef(ctx, a.Client(), dns.Spec.SecretRef)
+	dnsClient, err := dnsclient.NewDNSClientFromSecretRef(ctx, a.client, dns.Spec.SecretRef)
 	if err != nil {
 		return err
 	}
@@ -87,13 +91,13 @@ func (a *actuator) Reconcile(ctx context.Context, log logr.Logger, dns *extensio
 	// Update resource status
 	patch := client.MergeFrom(dns.DeepCopy())
 	dns.Status.Zone = &managedZone
-	return a.Client().Status().Patch(ctx, dns, patch)
+	return a.client.Status().Patch(ctx, dns, patch)
 }
 
 // Delete deletes the DNSRecord.
 func (a *actuator) Delete(ctx context.Context, log logr.Logger, dns *extensionsv1alpha1.DNSRecord, cluster *extensionscontroller.Cluster) error {
 	// Create GCP DNS client
-	dnsClient, err := dnsclient.NewDNSClientFromSecretRef(ctx, a.Client(), dns.Spec.SecretRef)
+	dnsClient, err := dnsclient.NewDNSClientFromSecretRef(ctx, a.client, dns.Spec.SecretRef)
 	if err != nil {
 		return err
 	}

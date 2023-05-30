@@ -41,22 +41,48 @@ const (
 	requeueAfterOnProviderError = 30 * time.Second
 )
 
+type Actuator interface {
+	dnsrecord.Actuator
+	ReconcileRecord(
+		ctx context.Context,
+		log logr.Logger,
+		dns *extensionsv1alpha1.DNSRecord,
+		cluster *extensionscontroller.Cluster,
+		dnsClient dnsclient.DNSClient,
+	) error
+}
+
 type actuator struct {
 	common.RESTConfigContext
 }
 
 // NewActuator creates a new dnsrecord.Actuator.
-func NewActuator() dnsrecord.Actuator {
+func NewActuator() Actuator {
 	return &actuator{}
 }
 
 // Reconcile reconciles the DNSRecord.
-func (a *actuator) Reconcile(ctx context.Context, log logr.Logger, dns *extensionsv1alpha1.DNSRecord, cluster *extensionscontroller.Cluster) error {
+func (a *actuator) Reconcile(
+	ctx context.Context,
+	log logr.Logger,
+	dns *extensionsv1alpha1.DNSRecord,
+	cluster *extensionscontroller.Cluster,
+) error {
 	dnsClient, err := dnsclient.NewDNSClientFromSecretRef(ctx, a.Client(), dns.Spec.SecretRef)
 	if err != nil {
 		return err
 	}
 
+	return a.ReconcileRecord(ctx, log, dns, cluster, dnsClient)
+}
+
+func (a *actuator) ReconcileRecord(
+	ctx context.Context,
+	log logr.Logger,
+	dns *extensionsv1alpha1.DNSRecord,
+	cluster *extensionscontroller.Cluster,
+	dnsClient dnsclient.DNSClient,
+) error {
 	// Determine DNS managed zone
 	managedZone, err := a.getManagedZone(ctx, log, dns, dnsClient)
 	if err != nil {
@@ -77,8 +103,10 @@ func (a *actuator) Reconcile(ctx context.Context, log logr.Logger, dns *extensio
 		dns.Spec.Name,
 		string(dns.Spec.RecordType),
 		dns.Spec.Values,
-		ttl,
-		dnsConfig.Proxied,
+		dnsclient.DNSRecordOptions{
+			TTL:     ttl,
+			Proxied: dnsConfig.Proxied,
+		},
 	); err != nil {
 		return &reconcilerutils.RequeueAfterError{
 			Cause:        fmt.Errorf("could not create or update DNS recordset in managed zone %s with name %s, type %s, and rrdatas %v: %+v", managedZone, dns.Spec.Name, dns.Spec.RecordType, dns.Spec.Values, err),
@@ -141,6 +169,9 @@ func (a *actuator) Migrate(context.Context, logr.Logger, *extensionsv1alpha1.DNS
 
 func (a *actuator) decodeDnsRecordConfig(dns *extensionsv1alpha1.DNSRecord) (*cloudflare.DnsRecordConfig, error) {
 	cfg := &cloudflare.DnsRecordConfig{}
+	if dns.Spec.ProviderConfig == nil {
+		return cfg, nil
+	}
 	if _, _, err := a.Decoder().Decode(dns.Spec.ProviderConfig.Raw, nil, cfg); err != nil {
 		return nil, err
 	}

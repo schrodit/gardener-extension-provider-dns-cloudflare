@@ -12,6 +12,11 @@ import (
 
 const API_TOKEN_FIELD = "apiToken"
 
+type DNSRecordOptions struct {
+	TTL     int64
+	Proxied bool
+}
+
 type DNSClient interface {
 	GetManagedZones(ctx context.Context) (map[string]string, error)
 	CreateOrUpdateRecordSet(
@@ -19,8 +24,7 @@ type DNSClient interface {
 		name,
 		recordType string,
 		rrdatas []string,
-		ttl int64,
-		proxied bool) error
+		opts DNSRecordOptions) error
 	DeleteRecordSet(ctx context.Context, managedZone, name, recordType string) error
 }
 
@@ -79,21 +83,27 @@ func (c *dnsClient) CreateOrUpdateRecordSet(
 	name,
 	recordType string,
 	rrdatas []string,
-	ttl int64,
-	proxied bool,
+	opts DNSRecordOptions,
 ) error {
 	records, err := c.getRecordSet(ctx, name, zoneID)
 	if err != nil {
 		return err
 	}
 	for _, rrdata := range rrdatas {
-		// TODO(schrodit): check if record is outdated
-		if _, ok := records[rrdata]; ok {
+		if record, ok := records[rrdata]; ok {
+			if recordIsOutdated(record, opts) {
+				if err := c.updateRecord(
+					ctx, zoneID, record.ID, name, recordType, rrdata, opts,
+				); err != nil {
+					return err
+				}
+			}
+
 			// entry already exists
 			delete(records, rrdata)
 			continue
 		}
-		if err := c.createRecord(ctx, zoneID, name, recordType, rrdata, ttl, proxied); err != nil {
+		if err := c.createRecord(ctx, zoneID, name, recordType, rrdata, opts); err != nil {
 			return err
 		}
 		delete(records, rrdata)
@@ -134,15 +144,14 @@ func (c *dnsClient) createRecord(
 	name,
 	recordType,
 	rrdata string,
-	ttl int64,
-	proxied bool,
+	opts DNSRecordOptions,
 ) error {
 	res, err := c.api.CreateDNSRecord(ctx, zoneID, cloudflare.DNSRecord{
 		Name:    name,
 		Type:    recordType,
-		TTL:     int(ttl),
+		TTL:     int(opts.TTL),
 		Content: rrdata,
-		Proxied: &proxied,
+		Proxied: &opts.Proxied,
 	})
 	if err != nil {
 		return fmt.Errorf("Unable to set dns record for %s to %s: %w", name, rrdata, err)
@@ -151,6 +160,24 @@ func (c *dnsClient) createRecord(
 		return fmt.Errorf("Unable to set dns record for %s to %s: %#v", name, rrdata, res.Errors)
 	}
 	return nil
+}
+
+func (c *dnsClient) updateRecord(
+	ctx context.Context,
+	zoneID,
+	recordID,
+	name,
+	recordType,
+	rrdata string,
+	opts DNSRecordOptions,
+) error {
+	return c.api.UpdateDNSRecord(ctx, zoneID, recordID, cloudflare.DNSRecord{
+		Name:    name,
+		Type:    recordType,
+		TTL:     int(opts.TTL),
+		Content: rrdata,
+		Proxied: &opts.Proxied,
+	})
 }
 
 func (c *dnsClient) deleteRecord(ctx context.Context, zoneID, recordID, name, rrdata string) error {
@@ -189,4 +216,8 @@ func (c *dnsClient) getRecordSet(ctx context.Context, name, zoneID string) (map[
 		records[record.Content] = record
 	}
 	return records, nil
+}
+
+func recordIsOutdated(current cloudflare.DNSRecord, expected DNSRecordOptions) bool {
+	return *current.Proxied != expected.Proxied || current.TTL != int(expected.TTL)
 }

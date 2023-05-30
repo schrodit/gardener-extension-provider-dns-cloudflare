@@ -19,9 +19,11 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/cloudflare"
 	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/dnsclient"
 
 	extensionscontroller "github.com/gardener/gardener/extensions/pkg/controller"
+	"github.com/gardener/gardener/extensions/pkg/controller/common"
 	"github.com/gardener/gardener/extensions/pkg/controller/dnsrecord"
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	extensionsv1alpha1 "github.com/gardener/gardener/pkg/apis/extensions/v1alpha1"
@@ -40,7 +42,7 @@ const (
 )
 
 type actuator struct {
-	client client.Client
+	common.RESTConfigContext
 }
 
 // NewActuator creates a new dnsrecord.Actuator.
@@ -48,14 +50,9 @@ func NewActuator() dnsrecord.Actuator {
 	return &actuator{}
 }
 
-func (a *actuator) InjectClient(client client.Client) error {
-	a.client = client
-	return nil
-}
-
 // Reconcile reconciles the DNSRecord.
 func (a *actuator) Reconcile(ctx context.Context, log logr.Logger, dns *extensionsv1alpha1.DNSRecord, cluster *extensionscontroller.Cluster) error {
-	dnsClient, err := dnsclient.NewDNSClientFromSecretRef(ctx, a.client, dns.Spec.SecretRef)
+	dnsClient, err := dnsclient.NewDNSClientFromSecretRef(ctx, a.Client(), dns.Spec.SecretRef)
 	if err != nil {
 		return err
 	}
@@ -66,10 +63,23 @@ func (a *actuator) Reconcile(ctx context.Context, log logr.Logger, dns *extensio
 		return err
 	}
 
+	dnsConfig, err := a.decodeDnsRecordConfig(dns)
+	if err != nil {
+		return err
+	}
+
 	// Create or update DNS recordset
 	ttl := extensionsv1alpha1helper.GetDNSRecordTTL(dns.Spec.TTL)
 	log.Info("Creating or updating DNS recordset", "managedZone", managedZone, "name", dns.Spec.Name, "type", dns.Spec.RecordType, "rrdatas", dns.Spec.Values, "dnsrecord", kutil.ObjectName(dns))
-	if err := dnsClient.CreateOrUpdateRecordSet(ctx, managedZone, dns.Spec.Name, string(dns.Spec.RecordType), dns.Spec.Values, ttl); err != nil {
+	if err := dnsClient.CreateOrUpdateRecordSet(
+		ctx,
+		managedZone,
+		dns.Spec.Name,
+		string(dns.Spec.RecordType),
+		dns.Spec.Values,
+		ttl,
+		dnsConfig.Proxied,
+	); err != nil {
 		return &reconcilerutils.RequeueAfterError{
 			Cause:        fmt.Errorf("could not create or update DNS recordset in managed zone %s with name %s, type %s, and rrdatas %v: %+v", managedZone, dns.Spec.Name, dns.Spec.RecordType, dns.Spec.Values, err),
 			RequeueAfter: requeueAfterOnProviderError,
@@ -91,13 +101,13 @@ func (a *actuator) Reconcile(ctx context.Context, log logr.Logger, dns *extensio
 	// Update resource status
 	patch := client.MergeFrom(dns.DeepCopy())
 	dns.Status.Zone = &managedZone
-	return a.client.Status().Patch(ctx, dns, patch)
+	return a.Client().Status().Patch(ctx, dns, patch)
 }
 
 // Delete deletes the DNSRecord.
 func (a *actuator) Delete(ctx context.Context, log logr.Logger, dns *extensionsv1alpha1.DNSRecord, cluster *extensionscontroller.Cluster) error {
 	// Create GCP DNS client
-	dnsClient, err := dnsclient.NewDNSClientFromSecretRef(ctx, a.client, dns.Spec.SecretRef)
+	dnsClient, err := dnsclient.NewDNSClientFromSecretRef(ctx, a.Client(), dns.Spec.SecretRef)
 	if err != nil {
 		return err
 	}
@@ -127,6 +137,14 @@ func (a *actuator) Restore(ctx context.Context, log logr.Logger, dns *extensions
 // Migrate migrates the DNSRecord.
 func (a *actuator) Migrate(context.Context, logr.Logger, *extensionsv1alpha1.DNSRecord, *extensionscontroller.Cluster) error {
 	return nil
+}
+
+func (a *actuator) decodeDnsRecordConfig(dns *extensionsv1alpha1.DNSRecord) (*cloudflare.DnsRecordConfig, error) {
+	cfg := &cloudflare.DnsRecordConfig{}
+	if _, _, err := a.Decoder().Decode(dns.Spec.ProviderConfig.Raw, nil, cfg); err != nil {
+		return nil, err
+	}
+	return cfg, nil
 }
 
 func (a *actuator) getManagedZone(ctx context.Context, log logr.Logger, dns *extensionsv1alpha1.DNSRecord, dnsClient dnsclient.DNSClient) (string, error) {

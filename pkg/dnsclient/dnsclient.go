@@ -14,7 +14,13 @@ const API_TOKEN_FIELD = "apiToken"
 
 type DNSClient interface {
 	GetManagedZones(ctx context.Context) (map[string]string, error)
-	CreateOrUpdateRecordSet(ctx context.Context, managedZone, name, recordType string, rrdatas []string, ttl int64) error
+	CreateOrUpdateRecordSet(
+		ctx context.Context, managedZone,
+		name,
+		recordType string,
+		rrdatas []string,
+		ttl int64,
+		proxied bool) error
 	DeleteRecordSet(ctx context.Context, managedZone, name, recordType string) error
 }
 
@@ -67,18 +73,27 @@ func (c *dnsClient) GetManagedZones(ctx context.Context) (map[string]string, err
 
 // CreateOrUpdateRecordSet creates or updates the resource recordset with the given name, record type, rrdatas, and ttl
 // in the managed zone with the given name or ID.
-func (c *dnsClient) CreateOrUpdateRecordSet(ctx context.Context, zoneID, name, recordType string, rrdatas []string, ttl int64) error {
+func (c *dnsClient) CreateOrUpdateRecordSet(
+	ctx context.Context,
+	zoneID,
+	name,
+	recordType string,
+	rrdatas []string,
+	ttl int64,
+	proxied bool,
+) error {
 	records, err := c.getRecordSet(ctx, name, zoneID)
 	if err != nil {
 		return err
 	}
 	for _, rrdata := range rrdatas {
+		// TODO(schrodit): check if record is outdated
 		if _, ok := records[rrdata]; ok {
 			// entry already exists
 			delete(records, rrdata)
 			continue
 		}
-		if err := c.createRecord(ctx, zoneID, name, recordType, rrdata, ttl); err != nil {
+		if err := c.createRecord(ctx, zoneID, name, recordType, rrdata, ttl, proxied); err != nil {
 			return err
 		}
 		delete(records, rrdata)
@@ -113,12 +128,21 @@ func (c *dnsClient) DeleteRecordSet(ctx context.Context, zoneID, name, recordTyp
 	return nil
 }
 
-func (c *dnsClient) createRecord(ctx context.Context, zoneID, name, recordType, rrdata string, ttl int64) error {
+func (c *dnsClient) createRecord(
+	ctx context.Context,
+	zoneID,
+	name,
+	recordType,
+	rrdata string,
+	ttl int64,
+	proxied bool,
+) error {
 	res, err := c.api.CreateDNSRecord(ctx, zoneID, cloudflare.DNSRecord{
 		Name:    name,
 		Type:    recordType,
 		TTL:     int(ttl),
 		Content: rrdata,
+		Proxied: &proxied,
 	})
 	if err != nil {
 		return fmt.Errorf("Unable to set dns record for %s to %s: %w", name, rrdata, err)

@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"os"
 
+	cftypes "github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/config/install"
 	cfcmd "github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/cmd"
 	cfdnsrecord "github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/controller/dnsrecord"
 
@@ -88,6 +89,9 @@ func NewControllerManagerCommand(ctx context.Context) *cobra.Command {
 			scheme := mgr.GetScheme()
 			if err := controller.AddToScheme(scheme); err != nil {
 				return fmt.Errorf("could not update manager scheme: %w", err)
+			}
+			if err := cftypes.AddToScheme(scheme); err != nil {
+				return fmt.Errorf("could not add cloudflare type to manager: %w", err)
 			}
 
 			dnsRecordCtrlOpts.Completed().Apply(&cfdnsrecord.DefaultAddOptions.Controller)

@@ -15,8 +15,8 @@
 package install
 
 import (
-	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/config"
-	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/config/v1alpha1"
+	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/cloudflare"
+	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/cloudflare/v1alpha1"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
@@ -25,7 +25,7 @@ import (
 var (
 	schemeBuilder = runtime.NewSchemeBuilder(
 		v1alpha1.AddToScheme,
-		config.AddToScheme,
+		cloudflare.AddToScheme,
 		setVersionPriority,
 	)
 

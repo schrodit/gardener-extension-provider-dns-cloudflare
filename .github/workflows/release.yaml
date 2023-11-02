@@ -21,7 +21,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_TOKEN }}
       - name: Set Version
-        run: echo "::set-output name=version::$(cat ./VERSION)"
+        run: echo "version=$(cat ./VERSION)" >> $GITHUB_OUTPUT
         id: version
       - name: Build image and push to Docker Hub and GitHub Container Registry
         uses: docker/build-push-action@v2

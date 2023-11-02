@@ -27,6 +27,9 @@ spec:
         {{- end }}
         checksum/configmap-{{ include "name" . }}-config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
       labels:
+        networking.gardener.cloud/to-runtime-apiserver: allowed
+        networking.gardener.cloud/to-dns: allowed
+        networking.gardener.cloud/to-public-networks: allowed
 {{ include "labels" . | indent 8 }}
     spec:
       priorityClassName: {{ include "name" . }}
@@ -67,10 +70,6 @@ spec:
             port: {{ .Values.healthPort }}
             scheme: HTTP
           initialDelaySeconds: 5
-        ports:
-        - name: webhook-server
-          containerPort: {{ .Values.webhookConfig.serverPort }}
-          protocol: TCP
 {{- if .Values.resources }}
         resources:
 {{ toYaml .Values.resources | nindent 10 }}

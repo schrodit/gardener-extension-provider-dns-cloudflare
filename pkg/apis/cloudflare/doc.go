@@ -17,4 +17,7 @@
 
 // Package v1alpha1 contains the cloudflare provider configuration API resources.
 // +groupName=cloudflare.dns.provider.extensions.gardener.cloud
+
+//go:generate ../../../hack/update-codegen.sh
+
 package cloudflare // import "github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/cloudflare"

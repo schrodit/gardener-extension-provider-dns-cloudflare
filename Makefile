@@ -125,4 +125,4 @@ test-clean:
 verify: check format test
 
 .PHONY: verify-extended
-verify-extended: check-generate check format test-cov test-clean
+verify-extended: check-generate check format test test-clean

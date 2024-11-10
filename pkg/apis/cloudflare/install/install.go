@@ -15,11 +15,11 @@
 package install
 
 import (
-	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/cloudflare"
-	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/cloudflare/v1alpha1"
-
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+
+	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/cloudflare"
+	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/cloudflare/v1alpha1"
 )
 
 var (

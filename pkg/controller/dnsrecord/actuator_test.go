@@ -3,26 +3,25 @@ package dnsrecord_test
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
-
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/serializer"
-	"sigs.k8s.io/controller-runtime/pkg/client/fake"
-	"sigs.k8s.io/controller-runtime/pkg/runtime/inject"
 
 	extensionscontroller "github.com/gardener/gardener/extensions/pkg/controller"
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	extensionsv1alpha1 "github.com/gardener/gardener/pkg/apis/extensions/v1alpha1"
-	"github.com/gardener/gardener/pkg/client/kubernetes"
 	"github.com/go-logr/logr"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/serializer"
 
 	cfinstall "github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/cloudflare/install"
 	cfv1alpha1 "github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/cloudflare/v1alpha1"
 	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/controller/dnsrecord"
 	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/dnsclient"
+	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/utils/rand"
 )
 
 func Int(i int64) *int64 {
@@ -46,24 +45,29 @@ var _ = Describe("Actuator", func() {
 	)
 
 	BeforeEach(func() {
-		extensionsv1alpha1.AddToScheme(scheme)
-		gardencorev1beta1.AddToScheme(scheme)
-		cfinstall.AddToScheme(scheme)
+		Expect(extensionsv1alpha1.AddToScheme(scheme)).ToNot(HaveOccurred())
+		Expect(gardencorev1beta1.AddToScheme(scheme)).ToNot(HaveOccurred())
+		Expect(cfinstall.AddToScheme(scheme)).ToNot(HaveOccurred())
 
 		codec := serializer.NewCodecFactory(scheme, serializer.EnableStrict)
 
 		info, found := runtime.SerializerInfoForMediaType(codec.SupportedMediaTypes(), runtime.ContentTypeJSON)
 		Expect(found).To(BeTrue(), "should be able to decode")
 
-		kubernetes.GardenCodec.UniversalDecoder()
-
 		encoder = codec.EncoderForVersion(info.Serializer, cfv1alpha1.SchemeGroupVersion)
 	})
 
 	It("no providerconfig -> default proxied to false", func(ctx context.Context) {
+		ns := &corev1.Namespace{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: fmt.Sprintf("test-%s", rand.RandStringRunes(5)),
+			},
+		}
+		Expect(k8sManager.GetClient().Create(ctx, ns)).To(Succeed())
 		record := &extensionsv1alpha1.DNSRecord{
 			ObjectMeta: metav1.ObjectMeta{
-				Name: "test",
+				Name:      "test",
+				Namespace: ns.ObjectMeta.Name,
 			},
 			Spec: extensionsv1alpha1.DNSRecordSpec{
 				Name:       "test.example.com",
@@ -72,15 +76,16 @@ var _ = Describe("Actuator", func() {
 				TTL:        Int(300),
 			},
 		}
+		c := k8sManager.GetClient()
+		Expect(c.Create(ctx, record)).To(Succeed())
 
-		a := dnsrecord.NewActuator()
-		inject.ClientInto(fake.NewClientBuilder().WithScheme(scheme).WithObjects(record).Build(), a)
+		a := dnsrecord.NewActuator(k8sManager)
 
 		dnsClient := dnsclient.NewFakeDNSClient(
 			map[string]string{"example.com": "1"},
 			make(map[string]dnsclient.Record),
 		)
-		Expect(a.ReconcileRecord(ctx, logr.Discard(), record, &extensionscontroller.Cluster{}, dnsClient)).NotTo(HaveOccurred())
+		Expect(a.ReconcileRecord(ctx, logr.Discard(), record.DeepCopy(), &extensionscontroller.Cluster{}, dnsClient)).NotTo(HaveOccurred())
 		Expect(dnsClient.Records).To(HaveKeyWithValue("127.0.0.1", dnsclient.Record{
 			ZoneID:     "1",
 			Name:       "test.example.com",
@@ -94,9 +99,16 @@ var _ = Describe("Actuator", func() {
 	})
 
 	It("providerconfig proxied true -> proxied is enabled", func(ctx context.Context) {
+		ns := &corev1.Namespace{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: fmt.Sprintf("test-%s", rand.RandStringRunes(5)),
+			},
+		}
+		Expect(k8sManager.GetClient().Create(ctx, ns)).To(Succeed())
 		record := &extensionsv1alpha1.DNSRecord{
 			ObjectMeta: metav1.ObjectMeta{
-				Name: "test",
+				Name:      "test",
+				Namespace: ns.ObjectMeta.Name,
 			},
 			Spec: extensionsv1alpha1.DNSRecordSpec{
 				Name:       "test.example.com",
@@ -111,9 +123,9 @@ var _ = Describe("Actuator", func() {
 			},
 		}
 
-		a := dnsrecord.NewActuator()
-		inject.ClientInto(fake.NewClientBuilder().WithScheme(scheme).WithObjects(record).Build(), a)
-		inject.SchemeInto(scheme, a)
+		c := k8sManager.GetClient()
+		Expect(c.Create(ctx, record)).To(Succeed())
+		a := dnsrecord.NewActuator(k8sManager)
 
 		dnsClient := dnsclient.NewFakeDNSClient(
 			map[string]string{"example.com": "1"},

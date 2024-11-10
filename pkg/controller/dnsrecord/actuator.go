@@ -19,19 +19,20 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/cloudflare"
-	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/dnsclient"
-
 	extensionscontroller "github.com/gardener/gardener/extensions/pkg/controller"
-	"github.com/gardener/gardener/extensions/pkg/controller/common"
 	"github.com/gardener/gardener/extensions/pkg/controller/dnsrecord"
 	gardencorev1beta1 "github.com/gardener/gardener/pkg/apis/core/v1beta1"
 	extensionsv1alpha1 "github.com/gardener/gardener/pkg/apis/extensions/v1alpha1"
 	extensionsv1alpha1helper "github.com/gardener/gardener/pkg/apis/extensions/v1alpha1/helper"
 	reconcilerutils "github.com/gardener/gardener/pkg/controllerutils/reconciler"
-	kutil "github.com/gardener/gardener/pkg/utils/kubernetes"
 	"github.com/go-logr/logr"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/serializer"
+	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
+
+	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/cloudflare"
+	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/dnsclient"
 )
 
 const (
@@ -41,6 +42,7 @@ const (
 	requeueAfterOnProviderError = 30 * time.Second
 )
 
+// Actuator defines an interface for the DNSRecord controller.
 type Actuator interface {
 	dnsrecord.Actuator
 	ReconcileRecord(
@@ -53,12 +55,16 @@ type Actuator interface {
 }
 
 type actuator struct {
-	common.RESTConfigContext
+	client  k8sclient.Client
+	decoder runtime.Decoder
 }
 
 // NewActuator creates a new dnsrecord.Actuator.
-func NewActuator() Actuator {
-	return &actuator{}
+func NewActuator(mgr manager.Manager) Actuator {
+	return &actuator{
+		client:  mgr.GetClient(),
+		decoder: serializer.NewCodecFactory(mgr.GetScheme(), serializer.EnableStrict).UniversalDecoder(),
+	}
 }
 
 // Reconcile reconciles the DNSRecord.
@@ -68,7 +74,7 @@ func (a *actuator) Reconcile(
 	dns *extensionsv1alpha1.DNSRecord,
 	cluster *extensionscontroller.Cluster,
 ) error {
-	dnsClient, err := dnsclient.NewDNSClientFromSecretRef(ctx, a.Client(), dns.Spec.SecretRef)
+	dnsClient, err := dnsclient.NewDNSClientFromSecretRef(ctx, a.client, dns.Spec.SecretRef)
 	if err != nil {
 		return err
 	}
@@ -76,14 +82,16 @@ func (a *actuator) Reconcile(
 	return a.ReconcileRecord(ctx, log, dns, cluster, dnsClient)
 }
 
+// ReconcileRecord reconciles the DNSRecord.
+// Creates or updates the DNS recordset in the managed zone.
+// Deletes the meta DNS recordset if it exists.
 func (a *actuator) ReconcileRecord(
 	ctx context.Context,
 	log logr.Logger,
 	dns *extensionsv1alpha1.DNSRecord,
-	cluster *extensionscontroller.Cluster,
+	_ *extensionscontroller.Cluster,
 	dnsClient dnsclient.DNSClient,
 ) error {
-	// Determine DNS managed zone
 	managedZone, err := a.getManagedZone(ctx, log, dns, dnsClient)
 	if err != nil {
 		return err
@@ -94,9 +102,13 @@ func (a *actuator) ReconcileRecord(
 		return err
 	}
 
-	// Create or update DNS recordset
 	ttl := extensionsv1alpha1helper.GetDNSRecordTTL(dns.Spec.TTL)
-	log.Info("Creating or updating DNS recordset", "managedZone", managedZone, "name", dns.Spec.Name, "type", dns.Spec.RecordType, "rrdatas", dns.Spec.Values, "dnsrecord", kutil.ObjectName(dns))
+	log.Info("Creating or updating DNS recordset",
+		"managedZone", managedZone,
+		"name", dns.Spec.Name,
+		"type", dns.Spec.RecordType,
+		"rrdatas", dns.Spec.Values,
+		"dnsrecord", k8sclient.ObjectKeyFromObject(dns))
 	if err := dnsClient.CreateOrUpdateRecordSet(
 		ctx,
 		managedZone,
@@ -117,7 +129,11 @@ func (a *actuator) ReconcileRecord(
 	// Delete meta DNS recordset if exists
 	if dns.Status.LastOperation == nil || dns.Status.LastOperation.Type == gardencorev1beta1.LastOperationTypeCreate {
 		name, recordType := dnsrecord.GetMetaRecordName(dns.Spec.Name), "TXT"
-		log.Info("Deleting meta DNS recordset", "managedZone", managedZone, "name", name, "type", recordType, "dnsrecord", kutil.ObjectName(dns))
+		log.Info("Deleting meta DNS recordset",
+			"managedZone", managedZone,
+			"name", name,
+			"type", recordType,
+			"dnsrecord", k8sclient.ObjectKeyFromObject(dns))
 		if err := dnsClient.DeleteRecordSet(ctx, managedZone, name, recordType); err != nil {
 			return &reconcilerutils.RequeueAfterError{
 				Cause:        fmt.Errorf("could not delete meta DNS recordset in managed zone %s with name %s and type %s: %+v", managedZone, name, recordType, err),
@@ -126,28 +142,33 @@ func (a *actuator) ReconcileRecord(
 		}
 	}
 
-	// Update resource status
-	patch := client.MergeFrom(dns.DeepCopy())
+	patch := k8sclient.MergeFrom(dns.DeepCopy())
 	dns.Status.Zone = &managedZone
-	return a.Client().Status().Patch(ctx, dns, patch)
+	return a.client.Status().Patch(ctx, dns, patch)
 }
 
 // Delete deletes the DNSRecord.
-func (a *actuator) Delete(ctx context.Context, log logr.Logger, dns *extensionsv1alpha1.DNSRecord, cluster *extensionscontroller.Cluster) error {
-	// Create GCP DNS client
-	dnsClient, err := dnsclient.NewDNSClientFromSecretRef(ctx, a.Client(), dns.Spec.SecretRef)
+func (a *actuator) Delete(
+	ctx context.Context,
+	log logr.Logger,
+	dns *extensionsv1alpha1.DNSRecord,
+	_ *extensionscontroller.Cluster,
+) error {
+	dnsClient, err := dnsclient.NewDNSClientFromSecretRef(ctx, a.client, dns.Spec.SecretRef)
 	if err != nil {
 		return err
 	}
 
-	// Determine DNS managed zone
 	managedZone, err := a.getManagedZone(ctx, log, dns, dnsClient)
 	if err != nil {
 		return err
 	}
 
-	// Delete DNS recordset
-	log.Info("Deleting DNS recordset", "managedZone", managedZone, "name", dns.Spec.Name, "type", dns.Spec.RecordType, "dnsrecord", kutil.ObjectName(dns))
+	log.Info("Deleting DNS recordset",
+		"managedZone", managedZone,
+		"name", dns.Spec.Name,
+		"type", dns.Spec.RecordType,
+		"dnsrecord", k8sclient.ObjectKeyFromObject(dns))
 	if err := dnsClient.DeleteRecordSet(ctx, managedZone, dns.Spec.Name, string(dns.Spec.RecordType)); err != nil {
 		return &reconcilerutils.RequeueAfterError{
 			Cause:        fmt.Errorf("could not delete DNS recordset in managed zone %s with name %s and type %s: %+v", managedZone, dns.Spec.Name, dns.Spec.RecordType, err),
@@ -167,12 +188,22 @@ func (a *actuator) Migrate(context.Context, logr.Logger, *extensionsv1alpha1.DNS
 	return nil
 }
 
+// ForceDelete deletes the DNSRecord without waiting for the DNS recordset to be deleted.
+func (a *actuator) ForceDelete(
+	ctx context.Context,
+	log logr.Logger,
+	dns *extensionsv1alpha1.DNSRecord,
+	cluster *extensionscontroller.Cluster,
+) error {
+	return a.Delete(ctx, log, dns, cluster)
+}
+
 func (a *actuator) decodeDnsRecordConfig(dns *extensionsv1alpha1.DNSRecord) (*cloudflare.DnsRecordConfig, error) {
 	cfg := &cloudflare.DnsRecordConfig{}
 	if dns.Spec.ProviderConfig == nil {
 		return cfg, nil
 	}
-	if _, _, err := a.Decoder().Decode(dns.Spec.ProviderConfig.Raw, nil, cfg); err != nil {
+	if _, _, err := a.decoder.Decode(dns.Spec.ProviderConfig.Raw, nil, cfg); err != nil {
 		return nil, err
 	}
 	return cfg, nil
@@ -194,7 +225,7 @@ func (a *actuator) getManagedZone(ctx context.Context, log logr.Logger, dns *ext
 				RequeueAfter: requeueAfterOnProviderError,
 			}
 		}
-		log.Info("Got DNS managed zones", "zones", zones, "dnsrecord", kutil.ObjectName(dns))
+		log.Info("Got DNS managed zones", "zones", zones, "dnsrecord", k8sclient.ObjectKeyFromObject(dns))
 		zone := dnsrecord.FindZoneForName(zones, dns.Spec.Name)
 		if zone == "" {
 			return "", fmt.Errorf("could not find DNS managed zone for name %s", dns.Spec.Name)

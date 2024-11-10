@@ -10,13 +10,16 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+// API_TOKEN_FIELD is the field name in the secret data containing the api token.
 const API_TOKEN_FIELD = "apiToken"
 
+// DNSRecordOptions contains optional parameters for creating or updating a DNS record.
 type DNSRecordOptions struct {
 	TTL     int64
 	Proxied bool
 }
 
+// DNSClient is an interface for interacting with a DNS provider.
 type DNSClient interface {
 	GetManagedZones(ctx context.Context) (map[string]string, error)
 	CreateOrUpdateRecordSet(
@@ -33,7 +36,7 @@ type dnsClient struct {
 }
 
 // NewDNSClient creates a new dns client with a cloudflare api token.
-func NewDNSClient(ctx context.Context, apiToken string) (DNSClient, error) {
+func NewDNSClient(_ context.Context, apiToken string) (DNSClient, error) {
 	api, err := cloudflare.NewWithAPIToken(apiToken)
 	if err != nil {
 		return nil, err

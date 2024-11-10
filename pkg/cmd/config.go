@@ -17,10 +17,10 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/spf13/pflag"
+
 	"github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/config"
 	configloader "github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/config/loader"
-
-	"github.com/spf13/pflag"
 )
 
 // ConfigOptions are command line options that can be set for config.ControllerConfiguration.

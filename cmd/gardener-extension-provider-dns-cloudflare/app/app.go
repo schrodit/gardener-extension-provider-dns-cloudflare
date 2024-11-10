@@ -19,19 +19,18 @@ import (
 	"fmt"
 	"os"
 
-	cftypes "github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/config/install"
-	cfcmd "github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/cmd"
-	cfdnsrecord "github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/controller/dnsrecord"
-
 	"github.com/gardener/gardener/extensions/pkg/controller"
 	controllercmd "github.com/gardener/gardener/extensions/pkg/controller/cmd"
 	"github.com/gardener/gardener/extensions/pkg/util"
 	gardenerhealthz "github.com/gardener/gardener/pkg/healthz"
 	"github.com/spf13/cobra"
-	"k8s.io/client-go/tools/leaderelection/resourcelock"
 	"k8s.io/component-base/version/verflag"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+
+	cftypes "github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/apis/config/install"
+	cfcmd "github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/cmd"
+	cfdnsrecord "github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/controller/dnsrecord"
 )
 
 const name = "dns-provider-cloudflare"
@@ -42,11 +41,10 @@ func NewControllerManagerCommand(ctx context.Context) *cobra.Command {
 		generalOpts = &controllercmd.GeneralOptions{}
 		restOpts    = &controllercmd.RESTOptions{}
 		mgrOpts     = &controllercmd.ManagerOptions{
-			LeaderElection:             true,
-			LeaderElectionResourceLock: resourcelock.LeasesResourceLock,
-			LeaderElectionID:           controllercmd.LeaderElectionNameID(name),
-			LeaderElectionNamespace:    os.Getenv("LEADER_ELECTION_NAMESPACE"),
-			HealthBindAddress:          ":8081",
+			LeaderElection:          true,
+			LeaderElectionID:        controllercmd.LeaderElectionNameID(name),
+			LeaderElectionNamespace: os.Getenv("LEADER_ELECTION_NAMESPACE"),
+			HealthBindAddress:       ":8081",
 		}
 		configFileOpts = &cfcmd.ConfigOptions{}
 
@@ -72,7 +70,7 @@ func NewControllerManagerCommand(ctx context.Context) *cobra.Command {
 	cmd := &cobra.Command{
 		Use: fmt.Sprintf("%s-controller-manager", name),
 
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			verflag.PrintAndExitIfRequested()
 
 			if err := aggOption.Complete(); err != nil {
@@ -96,7 +94,7 @@ func NewControllerManagerCommand(ctx context.Context) *cobra.Command {
 
 			dnsRecordCtrlOpts.Completed().Apply(&cfdnsrecord.DefaultAddOptions.Controller)
 
-			if err := controllerSwitches.Completed().AddToManager(mgr); err != nil {
+			if err := controllerSwitches.Completed().AddToManager(ctx, mgr); err != nil {
 				return fmt.Errorf("could not add controllers to manager: %w", err)
 			}
 

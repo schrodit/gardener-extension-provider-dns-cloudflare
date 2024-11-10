@@ -15,11 +15,14 @@
 package dnsrecord
 
 import (
+	"context"
+
 	"github.com/gardener/gardener/extensions/pkg/controller/dnsrecord"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
+// DNSType is the type of the DNS controller.
 const DNSType = "cloudflare-dns"
 
 var (
@@ -37,16 +40,19 @@ type AddOptions struct {
 
 // AddToManagerWithOptions adds a controller with the given Options to the given manager.
 // The opts.Reconciler is being set with a newly instantiated actuator.
-func AddToManagerWithOptions(mgr manager.Manager, opts AddOptions) error {
-	return dnsrecord.Add(mgr, dnsrecord.AddArgs{
-		Actuator:          NewActuator(),
+func AddToManagerWithOptions(
+	ctx context.Context, mgr manager.Manager, opts AddOptions,
+) error {
+	return dnsrecord.Add(ctx, mgr, dnsrecord.AddArgs{
+		Actuator:          NewActuator(mgr),
 		ControllerOptions: opts.Controller,
-		Predicates:        dnsrecord.DefaultPredicates(opts.IgnoreOperationAnnotation),
-		Type:              DNSType,
+		Predicates: dnsrecord.DefaultPredicates(
+			ctx, mgr, opts.IgnoreOperationAnnotation),
+		Type: DNSType,
 	})
 }
 
 // AddToManager adds a controller with the default Options.
-func AddToManager(mgr manager.Manager) error {
-	return AddToManagerWithOptions(mgr, DefaultAddOptions)
+func AddToManager(ctx context.Context, mgr manager.Manager) error {
+	return AddToManagerWithOptions(ctx, mgr, DefaultAddOptions)
 }

@@ -15,10 +15,10 @@
 package cmd
 
 import (
-	dnsrecordcontroller "github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/controller/dnsrecord"
-
 	controllercmd "github.com/gardener/gardener/extensions/pkg/controller/cmd"
 	extensionsdnsrecordcontroller "github.com/gardener/gardener/extensions/pkg/controller/dnsrecord"
+
+	dnsrecordcontroller "github.com/schrodit/gardener-extension-provider-dns-cloudflare/pkg/controller/dnsrecord"
 )
 
 // ControllerSwitchOptions are the controllercmd.SwitchOptions for the provider controllers.

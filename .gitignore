@@ -1,6 +1,7 @@
 
 dev
 hack/tools/bin
+tmp
 
 *.coverprofile
 *.html

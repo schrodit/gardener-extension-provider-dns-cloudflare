@@ -42,9 +42,6 @@ ignoreResources: false
 #     version: ">= 1.12"
 #   ...
 
-leaderElection:
-  resourceLock: leases
-
 config:
   clientConnection:
     acceptContentTypes: application/json

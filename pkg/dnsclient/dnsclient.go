@@ -149,7 +149,7 @@ func (c *dnsClient) createRecord(
 	rrdata string,
 	opts DNSRecordOptions,
 ) error {
-	res, err := c.api.CreateDNSRecord(ctx, zoneID, cloudflare.DNSRecord{
+	_, err := c.api.CreateDNSRecord(ctx, cloudflare.ZoneIdentifier(zoneID), cloudflare.CreateDNSRecordParams{
 		Name:    name,
 		Type:    recordType,
 		TTL:     int(opts.TTL),
@@ -158,9 +158,6 @@ func (c *dnsClient) createRecord(
 	})
 	if err != nil {
 		return fmt.Errorf("Unable to set dns record for %s to %s: %w", name, rrdata, err)
-	}
-	if !res.Success {
-		return fmt.Errorf("Unable to set dns record for %s to %s: %#v", name, rrdata, res.Errors)
 	}
 	return nil
 }
@@ -174,17 +171,19 @@ func (c *dnsClient) updateRecord(
 	rrdata string,
 	opts DNSRecordOptions,
 ) error {
-	return c.api.UpdateDNSRecord(ctx, zoneID, recordID, cloudflare.DNSRecord{
+	_, err := c.api.UpdateDNSRecord(ctx, cloudflare.ZoneIdentifier(zoneID), cloudflare.UpdateDNSRecordParams{
+		ID:      recordID,
 		Name:    name,
 		Type:    recordType,
 		TTL:     int(opts.TTL),
 		Content: rrdata,
 		Proxied: &opts.Proxied,
 	})
+	return err
 }
 
 func (c *dnsClient) deleteRecord(ctx context.Context, zoneID, recordID, name, rrdata string) error {
-	err := c.api.DeleteDNSRecord(ctx, zoneID, recordID)
+	err := c.api.DeleteDNSRecord(ctx, cloudflare.ZoneIdentifier(zoneID), recordID)
 	if err != nil {
 		return fmt.Errorf("Unable to set dns record for %s to %s: %w", name, rrdata, err)
 	}
@@ -205,7 +204,7 @@ func (c *dnsClient) getZoneID(ctx context.Context, name string) (string, error) 
 
 // getRecordSets returns a map of rrdata to dns record for the given name.
 func (c *dnsClient) getRecordSet(ctx context.Context, name, zoneID string) (map[string]cloudflare.DNSRecord, error) {
-	results, err := c.api.DNSRecords(ctx, zoneID, cloudflare.DNSRecord{
+	results, _, err := c.api.ListDNSRecords(ctx, cloudflare.ZoneIdentifier(zoneID), cloudflare.ListDNSRecordsParams{
 		Name: name,
 	})
 	if err != nil {

@@ -43,7 +43,7 @@ type AddOptions struct {
 func AddToManagerWithOptions(
 	ctx context.Context, mgr manager.Manager, opts AddOptions,
 ) error {
-	return dnsrecord.Add(ctx, mgr, dnsrecord.AddArgs{
+	return dnsrecord.Add(mgr, dnsrecord.AddArgs{
 		Actuator:          NewActuator(mgr),
 		ControllerOptions: opts.Controller,
 		Predicates: dnsrecord.DefaultPredicates(

@@ -1,12 +1,12 @@
 ############# builder
-FROM golang:1.23 AS builder
+FROM golang:1.24 AS builder
 
 WORKDIR /go/src/github.com/schrodit/gardener-extension-provider-dns-cloudflare
 COPY . .
 RUN make install
 
 ############# base image
-FROM alpine:3.13.7 AS base
+FROM alpine:3.22.0 AS base
 
 ############# gardener-extension-provider-dns-cloudflare
 FROM base AS gardener-extension-provider-dns-cloudflare

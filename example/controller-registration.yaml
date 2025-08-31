@@ -5,7 +5,7 @@ metadata:
   name: provider-dns-cloudflare
 helm:
   ociRepository:
-    repository: hcr.io/schrodit/helm/gardener-extension-provider-dns-cloudflare
+    repository: ghcr.io/schrodit/helm/gardener-extension-provider-dns-cloudflare
     tag: latest
 ---
 apiVersion: core.gardener.cloud/v1beta1

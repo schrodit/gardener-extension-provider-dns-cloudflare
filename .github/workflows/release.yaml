@@ -22,9 +22,9 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Build
-        uses: ./.github/actions/setup
+        uses: ./.github/actions/build
         with:
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish
         uses: ./.github/actions/publish

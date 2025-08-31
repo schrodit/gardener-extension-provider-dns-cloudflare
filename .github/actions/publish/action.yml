@@ -2,9 +2,9 @@ name: publish
 description: 'Publish docker images and helm chart'
 
 inputs:
-    ghcr_token:
-      description: 'Github token to access the ghcr registry'
-      required: true
+  ghcr_token:
+    description: 'Github token to access the ghcr registry'
+    required: true
 
 runs:
     using: 'composite'

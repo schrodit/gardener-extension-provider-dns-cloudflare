@@ -2,15 +2,15 @@ name: build
 description: 'Build the golang binaries'
 
 inputs:
-    github_token:
-      description: 'Github token to create a release. Optional'
+  github_token:
+    description: 'Github token to create a release. Optional'
 
 runs:
     using: 'composite'
     steps:
     - name: Setup Golang caches
       uses: actions/cache@v4
-      if: "${{ github.event.inputs.github_token == '' }}"
+      if: "${{ inputs.github_token == '' }}"
       with:
         path: |
           ~/.cache/go-build
@@ -19,7 +19,7 @@ runs:
 
     - name: Build
       uses: goreleaser/goreleaser-action@v6
-      if: "${{ github.event.inputs.github_token == '' }}"
+      if: "${{ inputs.github_token == '' }}"
       with:
         distribution: goreleaser
         version: '~> v2'

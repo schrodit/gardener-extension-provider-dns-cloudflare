@@ -24,7 +24,7 @@ jobs:
       - name: Build
         uses: ./.github/actions/setup
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          gh_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish
         uses: ./.github/actions/publish

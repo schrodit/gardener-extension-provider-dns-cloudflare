@@ -24,6 +24,16 @@ jobs:
           go-version: '${{ env.GOLANG_VERSION }}'
           check-latest: true
 
+      # Currently only used for next version
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: '~> v2'
+          install-only: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Run tests
         run: make test
 
@@ -55,7 +65,7 @@ jobs:
         with:
           distribution: goreleaser
           version: '~> v2'
-          args: build --snapshot
+          install-only: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

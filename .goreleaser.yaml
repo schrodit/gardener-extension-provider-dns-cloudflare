@@ -1,7 +1,7 @@
 version: 2
 
 builds:
-  - main: ./cmd
+  - main: ./cmd/gardener-extension-provider-dns-cloudflare
     binary: gardener-extension-provider-dns-cloudflare
     env:
       - CGO_ENABLED=0
@@ -10,5 +10,14 @@ builds:
     goarch:
       - amd64
       - arm64
+    ldflags:
+    - -s -w
+    - -X k8s.io/component-base/version.gitMajor={{.Major}}
+    - -X k8s.io/component-baseH/version.gitMinor={{.Minor}}
+    - -X k8s.io/component-base/version.gitVersion={{.Version}}
+    - -X k8s.io/component-base/version.gitTreeState={{.GitTreeState}}
+    - -X k8s.io/component-base/version.gitCommit={{.Commit}}
+    - -X k8s.io/component-base/version.buildDate={{.Date}}
+    - -X k8s.io/component-base/version/verflag.programName=gardener-extension-provider-dns-cloudflare
 checksum:
   name_template: 'checksums.txt'

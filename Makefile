@@ -61,14 +61,9 @@ hook-me: $(KUBECTL)
 # Rules related to binary build, Docker image build and release #
 #################################################################
 
-.PHONY: install
-install:
-	@LD_FLAGS=$(LD_FLAGS) EFFECTIVE_VERSION=$(EFFECTIVE_VERSION) \
-	bash $(GARDENER_HACK_DIR)/install.sh ./...
-
-.PHONY: docker-login
-docker-login:
-	@gcloud auth activate-service-account --key-file .kube-secrets/gcr/gcr-readwrite.json
+.PHONY: build
+build:
+	goreleaser build --snapshot --clean
 
 .PHONY: docker-images
 docker-images:
@@ -82,7 +77,6 @@ docker-images:
 tidy:
 	@go mod tidy
 	@mkdir -p $(REPO_ROOT)/.ci/hack && cp $(GARDENER_HACK_DIR)/.ci/* $(REPO_ROOT)/.ci/hack/ && chmod +xw $(REPO_ROOT)/.ci/hack/*
-	@cp $(GARDENER_HACK_DIR)/cherry-pick-pull.sh $(HACK_DIR)/cherry-pick-pull.sh && chmod +xw $(HACK_DIR)/cherry-pick-pull.sh
 
 .PHONY: clean
 clean:

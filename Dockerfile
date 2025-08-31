@@ -1,10 +1,3 @@
-############# builder
-FROM golang:1.24 AS builder
-
-WORKDIR /go/src/github.com/schrodit/gardener-extension-provider-dns-cloudflare
-COPY . .
-RUN make install
-
 ############# base image
 FROM alpine:3.22.0 AS base
 
@@ -12,5 +5,5 @@ FROM alpine:3.22.0 AS base
 FROM base AS gardener-extension-provider-dns-cloudflare
 
 COPY charts /charts
-COPY --from=builder /go/bin/gardener-extension-provider-dns-cloudflare /gardener-extension-provider-dns-cloudflare
+COPY ./dist/gardener-extension-provider-dns-cloudflare_linux_amd64_v1/gardener-extension-provider-dns-cloudflare /gardener-extension-provider-dns-cloudflare
 ENTRYPOINT ["/gardener-extension-provider-dns-cloudflare"]

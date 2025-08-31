@@ -67,7 +67,7 @@ var _ = Describe("Actuator", func() {
 		record := &extensionsv1alpha1.DNSRecord{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",
-				Namespace: ns.ObjectMeta.Name,
+				Namespace: ns.Name,
 			},
 			Spec: extensionsv1alpha1.DNSRecordSpec{
 				Name:       "test.example.com",
@@ -108,7 +108,7 @@ var _ = Describe("Actuator", func() {
 		record := &extensionsv1alpha1.DNSRecord{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test",
-				Namespace: ns.ObjectMeta.Name,
+				Namespace: ns.Name,
 			},
 			Spec: extensionsv1alpha1.DNSRecordSpec{
 				Name:       "test.example.com",

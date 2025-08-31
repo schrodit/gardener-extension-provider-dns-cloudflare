@@ -1,5 +1,6 @@
 
 dev
+dist
 hack/tools/bin
 tmp
 
@@ -13,3 +14,5 @@ tmp
 # Virtual go & fuse
 .virtualgo
 .fuse_hidden*
+
+VERSION

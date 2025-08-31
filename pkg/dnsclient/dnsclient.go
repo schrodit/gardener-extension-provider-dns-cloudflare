@@ -157,7 +157,7 @@ func (c *dnsClient) createRecord(
 		Proxied: &opts.Proxied,
 	})
 	if err != nil {
-		return fmt.Errorf("Unable to set dns record for %s to %s: %w", name, rrdata, err)
+		return fmt.Errorf("unable to set dns record for %s to %s: %w", name, rrdata, err)
 	}
 	return nil
 }
@@ -185,21 +185,9 @@ func (c *dnsClient) updateRecord(
 func (c *dnsClient) deleteRecord(ctx context.Context, zoneID, recordID, name, rrdata string) error {
 	err := c.api.DeleteDNSRecord(ctx, cloudflare.ZoneIdentifier(zoneID), recordID)
 	if err != nil {
-		return fmt.Errorf("Unable to set dns record for %s to %s: %w", name, rrdata, err)
+		return fmt.Errorf("unable to set dns record for %s to %s: %w", name, rrdata, err)
 	}
 	return nil
-}
-
-func (c *dnsClient) getZoneID(ctx context.Context, name string) (string, error) {
-	zones, err := c.GetManagedZones(ctx)
-	if err != nil {
-		return "", err
-	}
-	zoneID, ok := zones[name]
-	if !ok {
-		return "", fmt.Errorf("No zone found for %s", name)
-	}
-	return zoneID, nil
 }
 
 // getRecordSets returns a map of rrdata to dns record for the given name.

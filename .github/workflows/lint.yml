@@ -14,24 +14,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # pin@v5.0.0
 
-      - name: Add variables to environment file
-        run: cat ".github/env" >> "$GITHUB_ENV"
+      - name: SetUp and Build
+        uses: ./.github/actions/setup
 
-      - name: Set up Go
-        uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b # pin@5.4.0
-        with:
-          go-version: '${{ env.GOLANG_VERSION }}'
-          check-latest: true
-
-      # Currently only used for next version
-      - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v6
-        with:
-          distribution: goreleaser
-          version: '~> v2'
-          install-only: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Dummy VERSION file
+        run: echo "0.0.0" > ./VERSION
 
       - name: Setup Git Identity
         run: git config --global user.email "github-actions[bot]@users.noreply.github.com" && git config --global user.name "github-actions[bot]"

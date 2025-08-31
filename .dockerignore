@@ -7,6 +7,7 @@
 !charts/
 !cmd/
 !docs/
+!dist/
 !example/
 !hack/
 !pkg/

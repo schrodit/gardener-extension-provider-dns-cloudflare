@@ -1,6 +1,6 @@
 image:
   repository: ghcr.io/schrodit/gardener-extension-provider-dns-cloudflare
-  tag: latest
+#  tag: latest
   pullPolicy: IfNotPresent
 
 replicaCount: 1

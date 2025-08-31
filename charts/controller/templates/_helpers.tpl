@@ -14,11 +14,20 @@ app.kubernetes.io/name
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
-{{-  define "image" -}}
-  {{- if hasPrefix "sha256:" .Values.image.tag }}
-  {{- printf "%s@%s" .Values.image.repository .Values.image.tag }}
+{{- define "tag" -}}
+  {{- if .Values.image.tag }}
+  {{- .Values.image.tag }}
   {{- else }}
-  {{- printf "%s:%s" .Values.image.repository .Values.image.tag }}
+  {{- .Chart.Version }}
+  {{- end }}
+{{- end }}
+
+{{- define "image" -}}
+  {{- $tag := include "tag" . }}
+  {{- if hasPrefix "sha256:" $tag }}
+  {{- printf "%s@%s" .Values.image.repository $tag }}
+  {{- else }}
+  {{- printf "%s:%s" .Values.image.repository $tag }}
   {{- end }}
 {{- end }}
 

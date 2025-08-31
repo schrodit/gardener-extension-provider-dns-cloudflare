@@ -5,11 +5,8 @@ metadata:
   name: provider-dns-cloudflare
 helm:
   ociRepository:
-    repository: ghcr.io/schrodit/gardener-extension-provider-dns-cloudflare/helm/controller
+    repository: hcr.io/schrodit/helm/gardener-extension-provider-dns-cloudflare
     tag: latest
-  values:
-    image:
-      tag: 0.2.0
 ---
 apiVersion: core.gardener.cloud/v1beta1
 kind: ControllerRegistration

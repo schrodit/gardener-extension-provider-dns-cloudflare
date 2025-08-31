@@ -69,6 +69,11 @@ build:
 docker-images:
 	@docker build -t $(IMAGE_PREFIX)$(NAME):$(VERSION)           -t $(IMAGE_PREFIX)$(NAME):latest           -f Dockerfile -m 6g --target $(EXTENSION_PREFIX)-$(NAME) .
 
+.PHONY: publish-helm-chart
+publish-helm-chart:
+	helm package ./charts/controller --version=$(VERSION) -d ./dist/helm/controller
+	helm push ./dist/helm/controller/gardener-extension-provider-dns-cloudflare-$(VERSION).tgz oci://ghcr.io/schrodit/helm
+
 #####################################################################
 # Rules for verification, formatting, linting, testing and cleaning #
 #####################################################################
@@ -119,4 +124,4 @@ test-clean:
 verify: check format test
 
 .PHONY: verify-extended
-verify-extended: check-generate check format test test-clean
+verify-extended: check format test test-clean

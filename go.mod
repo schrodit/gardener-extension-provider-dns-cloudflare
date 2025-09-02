@@ -6,7 +6,7 @@ toolchain go1.24.3
 
 require (
 	github.com/ahmetb/gen-crd-api-reference-docs v0.3.0
-	github.com/cloudflare/cloudflare-go v0.113.0
+	github.com/cloudflare/cloudflare-go v0.115.0
 	github.com/gardener/gardener v1.119.0
 	github.com/go-logr/logr v1.4.3
 	github.com/golang/mock v1.6.0
@@ -51,7 +51,7 @@ require (
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/gobuffalo/flect v1.0.3 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
-	github.com/goccy/go-json v0.10.4 // indirect
+	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/btree v1.1.3 // indirect

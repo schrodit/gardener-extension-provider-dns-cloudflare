@@ -3,6 +3,7 @@ dev
 dist
 hack/tools/bin
 tmp
+.ci
 
 *.coverprofile
 *.html

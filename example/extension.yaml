@@ -1,0 +1,16 @@
+apiVersion: operator.gardener.cloud/v1alpha1
+kind: Extension
+metadata:
+  annotations:
+    security.gardener.cloud/pod-security-enforce: baseline
+  name: dns-provider-cloudflare
+spec:
+  deployment:
+    extension:
+      helm:
+        ociRepository:
+          repository: ghcr.io/schrodit/helm/gardener-extension-provider-dns-cloudflare
+          tag: latest
+  resources:
+  - kind: DNSRecord
+    type: cloudflare-dns

@@ -7,7 +7,7 @@ toolchain go1.24.3
 require (
 	github.com/ahmetb/gen-crd-api-reference-docs v0.3.0
 	github.com/cloudflare/cloudflare-go v0.115.0
-	github.com/gardener/gardener v1.126.0
+	github.com/gardener/gardener v1.127.1
 	github.com/go-logr/logr v1.4.3
 	github.com/golang/mock v1.6.0
 	github.com/onsi/ginkgo/v2 v2.25.0
@@ -48,7 +48,7 @@ require (
 	github.com/fxamacker/cbor/v2 v2.9.0 // indirect
 	github.com/gardener/cert-management v0.17.8 // indirect
 	github.com/gardener/etcd-druid/api v0.31.0 // indirect
-	github.com/gardener/machine-controller-manager v0.59.2 // indirect
+	github.com/gardener/machine-controller-manager v0.60.0 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.0 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-logr/zapr v1.3.0 // indirect
@@ -105,7 +105,7 @@ require (
 	github.com/perses/perses-operator v0.2.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.84.1 // indirect
+	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.85.0 // indirect
 	github.com/prometheus/client_golang v1.23.0 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.65.0 // indirect
@@ -173,7 +173,7 @@ require (
 	istio.io/api v1.25.4 // indirect
 	istio.io/client-go v1.25.1 // indirect
 	k8s.io/apiextensions-apiserver v0.34.0 // indirect
-	k8s.io/autoscaler/vertical-pod-autoscaler v1.4.1 // indirect
+	k8s.io/autoscaler/vertical-pod-autoscaler v1.4.2 // indirect
 	k8s.io/gengo v0.0.0-20230829151522-9cce18d56c01 // indirect
 	k8s.io/gengo/v2 v2.0.0-20250604051438-85fd79dbfd9f // indirect
 	k8s.io/klog v1.0.0 // indirect

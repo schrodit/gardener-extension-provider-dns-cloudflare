@@ -6,7 +6,7 @@ toolchain go1.24.3
 
 require (
 	github.com/ahmetb/gen-crd-api-reference-docs v0.3.0
-	github.com/cloudflare/cloudflare-go v0.115.0
+	github.com/cloudflare/cloudflare-go v0.116.0
 	github.com/gardener/gardener v1.126.0
 	github.com/go-logr/logr v1.4.3
 	github.com/golang/mock v1.6.0

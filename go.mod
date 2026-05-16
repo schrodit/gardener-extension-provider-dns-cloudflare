@@ -1,8 +1,8 @@
 module github.com/schrodit/gardener-extension-provider-dns-cloudflare
 
-go 1.24.0
+go 1.26.0
 
-toolchain go1.24.3
+toolchain go1.26.3
 
 require (
 	github.com/ahmetb/gen-crd-api-reference-docs v0.3.0

@@ -4,6 +4,7 @@ dist
 hack/tools/bin
 tmp
 .ci
+vendor
 
 *.coverprofile
 *.html

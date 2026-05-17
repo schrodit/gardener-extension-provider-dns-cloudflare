@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ENSURE_GARDENER_MOD         := $(shell go get github.com/gardener/gardener@$$(go list -m -f "{{.Version}}" github.com/gardener/gardener))
-GARDENER_HACK_DIR    		:= $(shell go list -m -f "{{.Dir}}" github.com/gardener/gardener)/hack
+ENSURE_GARDENER_MOD         := $(shell go get github.com/gardener/gardener@$$(go list -mod=mod -m -f "{{.Version}}" github.com/gardener/gardener))
+GARDENER_HACK_DIR    		:= $(shell go list -mod=mod -m -f "{{.Dir}}" github.com/gardener/gardener)/hack
+GARDENER_VERSION            := $(shell go list -mod=mod -m -f "{{.Version}}" github.com/gardener/gardener)
 
 EXTENSION_PREFIX            := gardener-extension
 NAME                        := provider-dns-cloudflare
@@ -21,7 +22,7 @@ REGISTRY                    := ghcr.io/schrodit
 IMAGE_PREFIX                := $(REGISTRY)/gardener-extension-
 REPO_ROOT                   := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 HACK_DIR                    := $(REPO_ROOT)/hack
-VERSION                     := $(shell bash $(HACK_DIR)/next-version.sh)
+VERSION                     ?= $(shell test -s $(REPO_ROOT)/VERSION && cat $(REPO_ROOT)/VERSION || echo 0.0.0)
 LD_FLAGS                    := "-w $(shell bash $(GARDENER_HACK_DIR)/get-build-ld-flags.sh k8s.io/component-base $(REPO_ROOT)/VERSION $(EXTENSION_PREFIX))"
 LEADER_ELECTION             := false
 IGNORE_OPERATION_ANNOTATION := true
@@ -51,7 +52,7 @@ start:
 		--config-file=./example/00-componentconfig.yaml \
 		--ignore-operation-annotation=$(IGNORE_OPERATION_ANNOTATION) \
 		--leader-election=$(LEADER_ELECTION) \
-		--gardener-version="v1.39.0"
+		--gardener-version="$(GARDENER_VERSION)"
 
 .PHONY: hook-me
 hook-me: $(KUBECTL)
@@ -98,16 +99,21 @@ check: $(GOIMPORTS) $(GOLANGCI_LINT)
 	@REPO_ROOT=$(REPO_ROOT) bash $(GARDENER_HACK_DIR)/check-charts.sh ./charts
 
 .PHONY: generate
-generate: $(VGOPATH) $(CONTROLLER_GEN) $(GEN_CRD_API_REFERENCE_DOCS) $(HELM) $(MOCKGEN) $(YQ)
-	@REPO_ROOT=$(REPO_ROOT) VGOPATH=$(VGOPATH) GARDENER_HACK_DIR=$(GARDENER_HACK_DIR) bash $(GARDENER_HACK_DIR)/generate-sequential.sh ./charts/... ./cmd/... ./example/... ./pkg/...
+generate: export GOFLAGS=-mod=mod
+generate: $(CONTROLLER_GEN) $(CRD_REF_DOCS) $(HELM) $(MOCKGEN) $(YQ)
+	@REPO_ROOT=$(REPO_ROOT) GARDENER_HACK_DIR=$(GARDENER_HACK_DIR) bash $(GARDENER_HACK_DIR)/generate-sequential.sh ./charts/... ./cmd/... ./example/... ./pkg/...
 	$(MAKE) format
 
 .PHONY: format
 format: $(GOIMPORTS) $(GOIMPORTSREVISER)
+ifeq ($(shell command -v parallel >/dev/null 2>&1 && echo found),found)
 	@bash $(GARDENER_HACK_DIR)/format.sh ./cmd ./pkg ./test
+else
+	@find ./cmd ./pkg ./test -type f -name '*.go' -print0 | xargs -0 $(GOIMPORTS) -w
+endif
 
 .PHONY: test
-test: export ENVTEST_K8S_VERSION = 1.30
+test: export ENVTEST_K8S_VERSION=1.33
 test: $(SETUP_ENVTEST)
 	@bash $(GARDENER_HACK_DIR)/prepare-envtest.sh
 	@bash $(HACK_DIR)/test.sh

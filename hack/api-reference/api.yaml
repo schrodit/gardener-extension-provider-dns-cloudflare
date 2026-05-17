@@ -1,0 +1,16 @@
+processor:
+  ignoreFields:
+    - "TypeMeta"
+  ignoreTypes:
+    - "ParseError$"
+    - "List$"
+
+render:
+  kubernetesVersion: "1.34"
+  knownTypes:
+    - name: RawExtension
+      package: k8s.io/apimachinery/pkg/runtime
+      link: https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension
+    - name: IntOrString
+      package: k8s.io/apimachinery/pkg/util/intstr
+      link: https://pkg.go.dev/k8s.io/apimachinery/pkg/util/intstr#IntOrString

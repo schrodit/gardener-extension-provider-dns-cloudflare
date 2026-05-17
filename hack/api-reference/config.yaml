@@ -1,0 +1,16 @@
+processor:
+  ignoreFields:
+    - "TypeMeta"
+  ignoreTypes:
+    - "ParseError$"
+    - "List$"
+
+render:
+  kubernetesVersion: "1.34"
+  knownTypes:
+    - name: Quantity
+      package: k8s.io/apimachinery/pkg/api/resource
+      link: https://pkg.go.dev/k8s.io/apimachinery/pkg/api/resource#Quantity
+    - name: LeaderElectionConfiguration
+      package: k8s.io/component-base/config/v1alpha1
+      link: https://pkg.go.dev/k8s.io/component-base/config/v1alpha1#LeaderElectionConfiguration

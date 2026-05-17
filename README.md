@@ -18,23 +18,20 @@ Please find more information regarding the extensibility concepts and a detailed
 
 ## Supported Kubernetes versions
 
-This extension controller supports the following Kubernetes versions:
+This extension controller follows the Kubernetes minor versions supported by the current Gardener dependency line used in this repository.
 
-| Version         | Support     | Conformance test results |
-| --------------- | ----------- | ------------------------ |
-| Kubernetes 1.23 | 1.23.0+     | :white_check_mark: |
-| Kubernetes 1.22 | 1.22.0+     | :heavy_check_mark: |
-| Kubernetes 1.21 | 1.21.0+     | :heavy_check_mark: |
-| Kubernetes 1.20 | 1.20.0+     | :white_check_mark: |
-| Kubernetes 1.19 | 1.19.0+     | :white_check_mark: |
-| Kubernetes 1.18 | 1.18.0+     | :white_check_mark: |
-| Kubernetes 1.17 | 1.17.0+     | :white_check_mark: |
-| Kubernetes 1.16 | 1.16.0+     | :white_check_mark: |
-| Kubernetes 1.15 | 1.15.0+     | :white_check_mark: |
+At the time of writing, the supported shoot Kubernetes versions are:
 
-:white_check_mark: : Not tested but should work
+| Version |
+| ------- |
+| Kubernetes 1.32 |
+| Kubernetes 1.33 |
+| Kubernetes 1.34 |
+| Kubernetes 1.35 |
 
-Please take a look [here](https://github.com/gardener/gardener/blob/master/docs/usage/supported_k8s_versions.md) to see which versions are supported by Gardener in general.
+The repository currently runs its test suite against Kubernetes `1.33` and generates API reference artifacts against Kubernetes `1.34`.
+
+Please take a look [here](https://gardener.cloud/docs/gardener/shoot-operations/supported_k8s_versions/) to see which Kubernetes versions are supported by Gardener in general.
 
 ----
 

@@ -1,5 +1,8 @@
 version: 2
 
+release:
+  mode: keep-existing
+
 builds:
   - main: ./cmd/gardener-extension-provider-dns-cloudflare
     binary: gardener-extension-provider-dns-cloudflare

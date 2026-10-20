@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-ENSURE_GARDENER_MOD         := $(shell go get github.com/gardener/gardener@$$(go list -mod=mod -m -f "{{.Version}}" github.com/gardener/gardener))
+# Download both modules before tools.mk resolves their directories in a fresh module cache.
+ENSURE_GARDENER_MOD         := $(shell go mod download github.com/gardener/gardener github.com/gardener/gardener/hack/tools)
 GARDENER_HACK_DIR    		:= $(shell go list -mod=mod -m -f "{{.Dir}}" github.com/gardener/gardener)/hack
 GARDENER_VERSION            := $(shell go list -mod=mod -m -f "{{.Version}}" github.com/gardener/gardener)
 

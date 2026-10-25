@@ -20,9 +20,6 @@ jobs:
       - name: SetUp
         uses: ./.github/actions/setup
 
-      - name: Dummy VERSION file
-        run: echo "0.0.0" > ./VERSION
-
       - name: Run tests
         run: make test
 

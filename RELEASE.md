@@ -1,7 +1,4 @@
 # Release Flow
 
-1. Increase the version in [./VERSION](./VERSION)
-    - Use semver versioning
-2. Regenerate all resources by running `make generate`
-3. Commit the the updated file to master with the title "Release <new version>"
-4. Trigger release by running [Release GitHub Action Job](https://github.com/schrodit/gardener-extension-provider-dns-cloudflare/actions/workflows/release.yaml)
+1. Merge the release pull request created by Release Please. It updates the [release manifest](./.release-please-manifest.json) and changelog.
+2. The [Release workflow](https://github.com/schrodit/gardener-extension-provider-dns-cloudflare/actions/workflows/release.yaml) creates the tag and publishes the binaries, container image, and Helm chart.

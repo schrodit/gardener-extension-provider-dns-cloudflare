@@ -23,8 +23,8 @@ REGISTRY                    := ghcr.io/schrodit
 IMAGE_PREFIX                := $(REGISTRY)/gardener-extension-
 REPO_ROOT                   := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 HACK_DIR                    := $(REPO_ROOT)/hack
-VERSION                     ?= $(shell test -s $(REPO_ROOT)/VERSION && cat $(REPO_ROOT)/VERSION || echo 0.0.0)
-LD_FLAGS                    := "-w $(shell bash $(GARDENER_HACK_DIR)/get-build-ld-flags.sh k8s.io/component-base $(REPO_ROOT)/VERSION $(EXTENSION_PREFIX))"
+VERSION                     ?= $(shell jq -r '."."' $(REPO_ROOT)/.release-please-manifest.json)
+LD_FLAGS                    := "-w -X k8s.io/component-base/version.gitVersion=v$(VERSION) -X k8s.io/component-base/version/verflag.programName=$(EXTENSION_PREFIX)-$(NAME)"
 LEADER_ELECTION             := false
 IGNORE_OPERATION_ANNOTATION := true
 

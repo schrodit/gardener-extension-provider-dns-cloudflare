@@ -6,7 +6,7 @@ processor:
     - "List$"
 
 render:
-  kubernetesVersion: "1.34"
+  kubernetesVersion: "1.37"
   knownTypes:
     - name: RawExtension
       package: k8s.io/apimachinery/pkg/runtime

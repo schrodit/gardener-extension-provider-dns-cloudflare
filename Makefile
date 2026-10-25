@@ -114,7 +114,7 @@ else
 endif
 
 .PHONY: test
-test: export ENVTEST_K8S_VERSION=1.33
+test: export ENVTEST_K8S_VERSION=1.37
 test: $(SETUP_ENVTEST)
 	@bash $(GARDENER_HACK_DIR)/prepare-envtest.sh
 	@bash $(HACK_DIR)/test.sh

@@ -15,7 +15,7 @@ Please find more information regarding the extensibility concepts and a detailed
 
 ## Supported Kubernetes versions
 
-Compatibility follows the [Gardener dependency in `go.mod`](go.mod). See [Gardener's supported shoot Kubernetes versions](https://gardener.cloud/docs/gardener/shoot-operations/supported_k8s_versions/) for the current list. The local test target uses Kubernetes `1.33` for envtest, and API reference generation is configured for Kubernetes `1.34`; neither setting defines the full range of supported shoot versions.
+Compatibility follows the [Gardener dependency in `go.mod`](go.mod). See [Gardener's supported shoot Kubernetes versions](https://gardener.cloud/docs/gardener/shoot-operations/supported_k8s_versions/) for the current list. The local test target and API reference generation both use Kubernetes `1.37`; these settings do not define the full range of supported shoot versions.
 
 ----
 

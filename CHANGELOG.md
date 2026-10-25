@@ -2,6 +2,21 @@
 
 ## 0.5.0 (2026-10-25)
 
+<!-- direct-release-commits-start -->
+### Direct commits
+
+* chore: update go version to 1.26 ([19d3166](https://github.com/schrodit/gardener-extension-provider-dns-cloudflare/commit/19d31662b35f4a34d2d8780736e4185338b795d2))
+* chore: update gardener to 1.142.1 ([34f1be0](https://github.com/schrodit/gardener-extension-provider-dns-cloudflare/commit/34f1be0b0895f473650df064ea6b1bb94722513f))
+* Update supported K8s versions ([1e6ad01](https://github.com/schrodit/gardener-extension-provider-dns-cloudflare/commit/1e6ad0166bf7a515a018f1090d223858806450ed))
+* ci: automate releases with Release Please ([736371b](https://github.com/schrodit/gardener-extension-provider-dns-cloudflare/commit/736371bd461087e4f5b093bf91fdbb97369f7ec3))
+* ci: set conventional prefixes for Dependabot commits ([6628759](https://github.com/schrodit/gardener-extension-provider-dns-cloudflare/commit/6628759b8e51fa9535c7405c17099dae5e80c299))
+* build: remove vendoring requirement for local startup ([c0805aa](https://github.com/schrodit/gardener-extension-provider-dns-cloudflare/commit/c0805aac864de13dc7d0888ae97a22f8c6b99717))
+* fix(release): include all changes in release notes ([8d54d5d](https://github.com/schrodit/gardener-extension-provider-dns-cloudflare/commit/8d54d5db289bee5a71715559089213015a22209c))
+* chore(k8s): align tests and generated manifests with 1.37 ([b7bf3b0](https://github.com/schrodit/gardener-extension-provider-dns-cloudflare/commit/b7bf3b0ec4aed25b71d6a6a890bb418f60e7a8f7))
+* build: use release manifest for local versioning ([0cf91c3](https://github.com/schrodit/gardener-extension-provider-dns-cloudflare/commit/0cf91c3a4b128228f641df82aa1f8e0670cc07ea))
+* chore: release 0.5.0 ([90f4be4](https://github.com/schrodit/gardener-extension-provider-dns-cloudflare/commit/90f4be498f45b7179fd26aba987e6142ff2fd537))
+<!-- direct-release-commits-end -->
+
 ## What's Changed
 * Bump github.com/spf13/pflag from 1.0.9 to 1.0.10 by @dependabot[bot] in https://github.com/schrodit/gardener-extension-provider-dns-cloudflare/pull/25
 * Bump k8s.io/apimachinery from 0.34.0 to 0.34.1 by @dependabot[bot] in https://github.com/schrodit/gardener-extension-provider-dns-cloudflare/pull/28

@@ -3,7 +3,7 @@ module github.com/schrodit/gardener-extension-provider-dns-cloudflare
 go 1.26.8
 
 require (
-	github.com/cloudflare/cloudflare-go v0.116.0
+	github.com/cloudflare/cloudflare-go v0.119.0
 	github.com/elastic/crd-ref-docs v0.3.0
 	github.com/gardener/gardener v1.153.1
 	github.com/gardener/gardener/hack/tools v1.153.1

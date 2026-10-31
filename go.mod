@@ -6,7 +6,7 @@ require (
 	github.com/cloudflare/cloudflare-go v0.119.0
 	github.com/elastic/crd-ref-docs v0.3.0
 	github.com/gardener/gardener v1.154.0
-	github.com/gardener/gardener/hack/tools v1.153.1
+	github.com/gardener/gardener/hack/tools v1.154.0
 	github.com/gardener/gardener/pkg/apis v1.153.2
 	github.com/go-logr/logr v1.4.4
 	github.com/onsi/ginkgo/v2 v2.33.1

@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.1 (2026-10-31)
+
+## What's Changed
+* chore(deps): bump github.com/cloudflare/cloudflare-go from 0.116.0 to 0.119.0 by @dependabot[bot] in https://github.com/schrodit/gardener-extension-provider-dns-cloudflare/pull/77
+* chore(deps): bump sigs.k8s.io/controller-tools from 0.22.0 to 0.23.0 by @dependabot[bot] in https://github.com/schrodit/gardener-extension-provider-dns-cloudflare/pull/76
+* chore(deps): bump github.com/gardener/gardener from 1.153.1 to 1.154.0 by @dependabot[bot] in https://github.com/schrodit/gardener-extension-provider-dns-cloudflare/pull/75
+
+
+**Full Changelog**: https://github.com/schrodit/gardener-extension-provider-dns-cloudflare/compare/v0.5.0...v0.5.1
+
 ## 0.5.0 (2026-10-25)
 
 <!-- direct-release-commits-start -->

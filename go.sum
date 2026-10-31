@@ -127,8 +127,8 @@ github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1/go.mod h1:Q3SI9o4m/ZMn
 github.com/circonus-labs/circonus-gometrics v2.3.1+incompatible/go.mod h1:nmEj6Dob7S7YxXgwXpfOuvO54S+tGdZdw9fuRZt25Ag=
 github.com/circonus-labs/circonusllhist v0.1.3/go.mod h1:kMXHVDlOchFAehlya5ePtbp5jckzBHf4XRpQvBOLI+I=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
-github.com/cloudflare/cloudflare-go v0.116.0 h1:iRPMnTtnswRpELO65NTwMX4+RTdxZl+Xf/zi+HPE95s=
-github.com/cloudflare/cloudflare-go v0.116.0/go.mod h1:Ds6urDwn/TF2uIU24mu7H91xkKP8gSAHxQ44DSZgVmU=
+github.com/cloudflare/cloudflare-go v0.119.0 h1:E1Qaf8AbXrNA5tBhYYpvH2NsPfpUtTpeG2A9SCJhlbE=
+github.com/cloudflare/cloudflare-go v0.119.0/go.mod h1:Ds6urDwn/TF2uIU24mu7H91xkKP8gSAHxQ44DSZgVmU=
 github.com/coder/quartz v0.3.1 h1:JMJLj4Xj4NLSrUC1R/g/Hn0y9fkyOvb8tf6P0j+kPn0=
 github.com/coder/quartz v0.3.1/go.mod h1:BgE7DOj/8NfvRgvKw0jPLDQH/2Lya2kxcTaNJ8X0rZk=
 github.com/coreos/go-systemd/v22 v22.7.0 h1:LAEzFkke61DFROc7zNLX/WA2i5J8gYqe0rSj9KI28KA=
